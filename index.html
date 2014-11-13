@@ -1,0 +1,521 @@
+<!doctype html>
+<html>
+	<head>
+<!--
+-----------------------------------------------------------------
+TODOLIST: !=fixed
+!Make it responsive >> more responsive
+!Added button settings toggle
+!Fix resize bug - div hidden in mobile view stays hidden when window resized
+Update markdown css
+Add code highlights with highlight.js
+!Add markdown file reading in
+Add fullscreen panel option
+-----------------------------------------------------------------
+--!>
+		<meta charset="utf-8">
+		<meta name="description" content="">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, inital-scale=1, user-scalable=no">
+
+		<!--link href="./images/favicon.svg" rel="icon" type="image/x-icon" /-->
+
+		<!--[IF lt IE 9]>
+			<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+
+		<title>
+			ParseMD - Markdown to HTML Parser
+		</title>
+
+		<!--link rel="stylesheet" type="text/css" href=""-->
+		<!--script type="text/javascript" src=""></script-->
+		<style>
+			@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro);
+			@import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono);
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: "Source Sans Pro", sans;
+				font-size: 15px;
+				text-align: center;
+				color: #000;
+
+				background: #fff;
+
+				min-height: 600px;
+			}
+
+			a {
+				color: #39C;
+				/*text-decoration: none;*/
+			}
+
+			p {
+			}
+
+			hr {
+				margin: 0.8em 0;
+			}
+
+			blockquote {
+				margin: 0px;
+			}
+				blockquote p {
+					font-style: italic;
+					padding: 0.5em;
+					margin: 0.5em;
+					border-left: 3px solid #A0AABF;
+				}
+
+			h1, h2, h3, h4, h5 , h6{
+				margin-top: 0.3em;
+				margin-bottom: 0.5em;
+			}
+				h1 {
+					font-size: 2em;
+				}
+				h2 {
+					font-size: 1.7em;
+				}
+				h3 {
+					font-size: 1.4em;
+				}
+				h4 {
+					font-size: 1.1em;
+				}
+				h5 {
+					font-size: 0.8em;
+				}
+				h6 {
+					font-size: 0.5em;
+				}
+
+			ul, ol {
+				line-height: 1.4em;
+				margin: 1em;
+				margin-left: 2em;
+			}
+
+			pre {
+				/*overflow: scroll;*/
+				display: block;
+				margin: 0.5em;
+				background: #F5F7FA;
+				line-height: 1.5em;
+				border: 1px solid #CCC;
+				border-radius:0.5em;
+				padding: 0.5em;
+				padding-bottom: 0.3em;;
+				word-break: break-all;
+				word-wrap: break-word;
+				overflow-x: scroll;
+			}
+				pre code {
+					padding: 0em;
+				}
+
+			label {
+				font-size: 1.3em;
+			}
+
+			header {
+				min-height: 3em;
+				padding: 10px;
+				padding-bottom: 2em;
+			}
+				header a{
+					text-decoration: none;
+				}
+				header a h1 {
+					font-size: 3em;
+					color: #000;
+					margin: 0;
+				}
+			aside {}
+			section {
+				/*padding: 10px;*/
+				position: relative;
+				float: none;
+			}
+			footer {
+				clear: both;
+				bottom: 0;
+				padding: 1em;
+				min-height: 2em;
+				text-align: center;
+			}
+				footer p {
+					font-size: 1.2em;
+					font-family: "Source Sans Pro", sans;
+					margin: 0.6em;
+				}
+				footer a {
+					margin-left: 0.2em;
+					margin-right: 0.2em;
+				}
+					.contacticon {
+						height: 24px;
+						width: 24px;
+						/*opacity: 0.50;
+						filter: alpha(opacity=50); /* <IE8 compatibility*/
+					}
+						.contacticon:hover {
+							/*opacity: 0.80;
+							filter: alpha(opacity=80); /* <IE8 compatibility*/
+						}
+
+			#mdOptions {
+				text-align: center;
+				display: none;
+			}
+				#mdOptions label {
+					margin: 0.5em;
+					display: inline-block;
+					min-width: 6em;
+					padding: 0.3em 0.5em;
+					border-radius: 1em;
+					background: #F9F9F9;
+				}
+					#mdOptions label input[type="checkbox"] {
+						margin: initial;
+						margin-left: 0.3em;
+						vertical-align: middle;
+						height: 20px;
+						width: 20px;
+					}
+			.props {
+				top: 0;
+				right: 0;
+				position: absolute;
+				margin: 1em;
+				text-align: right;
+				width: 30%;
+			}
+
+			.icons {
+				float: left;
+				height: 30px;
+				width: 30px;
+				display: inline-block;
+				vertical-align: middle;
+				padding-bottom: 0.5em;
+			}
+
+			.mobicons {
+				display: none;
+			}
+
+			.panelTop {
+				text-align: center;
+				margin: 0.2em;
+			}
+			#mdIn {
+				min-height: 400px;
+				display: block;
+				width: 48%;
+				margin: 1%;
+				float: left;
+				overflow-y: hidden;
+			}
+				#textIn {
+					font-family: "Ubuntu Mono", sans;
+					min-height: 400px;
+					width: 100%;
+					padding: 0.5em;
+					resize: none;
+					overflow-y: hidden !important;
+					word-wrap: break-word;
+			}
+			#htOut {
+				height: 100%;
+				display: block;
+				width: 48%;
+				margin: 1%;
+				float: right;
+			}
+				#htmlOut {
+					font-weight: normal;
+					background: #F9F9F9;
+					border: 1px solid #9E9E9E;
+					border-radius: 0.2em;
+					text-align: left;
+					padding: 0.5em;
+					min-height: 400px;
+				}
+
+			@media screen and (max-width: 720px) {
+				body {
+					text-align: left;
+				}
+				header, aside, section, footer{
+					position: static;
+					float: none;
+					width: auto;
+				}
+				header {
+					margin-bottom: 2em;
+				}
+
+				.panelTop {
+					text-align: center;
+					margin: 0.5em;
+				}
+				#mdIn {
+					width: 98%;
+					display: block;
+				}
+				#htOut {
+					width: 98%;
+					display: none;
+				}
+				.mobicons {
+					float: right;
+					height: 36px;
+					width: 36px;
+					display: inline-block;
+					vertical-align: middle;
+					padding-bottom: 0.5em;
+					margin-right: 0.5em;
+					cursor: pointer;
+
+				}
+			}
+
+		</style>
+
+		<script type="text/javascript" src="./marked.js"></script>
+		<script type="text/javascript">
+			//resize text area with increasing lines
+			function resizeTextArea() {
+				mdText=document.getElementById("textIn");
+				if ( mdText.value !== '' ){
+					mdText.style.height=(mdText.scrollHeight > mdText.clientHeight) ? (mdText.scrollHeight)+"px" : "400px";
+				}
+				else {mdText.style.height="400px";}
+			}
+
+			//markdown to html
+			function mdConvert() {
+				mdText=document.getElementById("textIn");
+				//alert(gfm);
+				options={
+					'gfm' : 		document.getElementById("gfm").checked,
+					'tables' : 		document.getElementById("tables").checked,
+					'breaks' : 		document.getElementById("breaks").checked,
+					'pedantic' : 	document.getElementById("pedantic").checked,
+					'sanitize' : 	document.getElementById("sanitize").checked,
+					'smartlists' : 	document.getElementById("smartlists").checked,
+					'smartypants' :	document.getElementById("smartypants").checked,
+				};
+				html=marked(mdText.value, options);
+				opDiv=document.getElementById("htmlOut");
+				opDiv.innerHTML=html;
+			}
+
+			//show/hide download links
+			function showDw() {
+				mdText=document.getElementById("textIn").value;
+				if (mdText === ''){
+					//show download buttons
+					mdbtn=document.getElementById("dwmd");
+					mdbtn.style.display="none";
+					htbtn=document.getElementById("dwml");
+					htbtn.style.display="none";
+				}
+				else {
+					//show download buttons
+					mdbtn=document.getElementById("dwmd");
+					mdbtn.style.display="initial";
+					htbtn=document.getElementById("dwml");
+					htbtn.style.display="initial";
+				}
+			}
+
+			//update above at once
+			function update() {
+				resizeTextArea("textIn");
+				mdConvert();
+				showDw();
+			}
+
+			function loadInnerMd() {
+				fileIn=document.getElementById("fileIn").files[0];
+				var fileReader=new FileReader();
+				fileReader.onload=function(fileLoadevent) {
+					var md=fileLoadevent.target.result;
+					document.getElementById("textIn").value=md;
+				};
+				fileReader.readAsText(fileIn, "UTF-8");
+			}
+
+			//download
+			function downloadInner(lid, fileName, el, mimeType) {
+				//innerHTML for htmlOut, value for textIn
+				var elInner=document.getElementById(el).innerHTML || document.getElementById(el).value;
+				mimetype=mimeType || "text/plain";
+				if ( elInner !== '' && elInner !== undefined ) {
+					//alert(elInner);
+					lid.setAttribute('download', fileName);
+					lid.setAttribute('href', 'data:' + mimeType + ';charset=utf-8, ' + encodeURIComponent(elInner));
+				}
+				else { alert("Please write some markdown.");}
+			}
+
+			//toggle view between editor and preview
+			function toggleView(h, s) {
+				//find and hide h
+				hide=document.getElementById(h);
+				hide.style.display="none";
+				//find and show s
+				show=document.getElementById(s);
+				show.style.display="block";
+				//show.style.width="98%";
+			}
+
+			//parser settings toggle
+			function toggleSettings() {
+				btn=document.getElementById("settingsBtn")
+				mdOp=document.getElementById("mdOptions");
+				if(mdOp.style.display == "block") {
+					mdOp.style.display="none";
+				}
+				else {
+					mdOp.style.display="block";
+				}
+			}
+
+			//show hidden panel when window bigger than 720
+			window.onresize = function () {
+				mdIn=document.getElementById("mdIn");
+				htOut=document.getElementById("htOut");
+				if (document.documentElement.clientWidth >= 720) {
+					mdIn.style.display="block";
+					mdIn.style.width="48%";
+					htOut.style.display="block";
+					htOut.style.width="48%";
+				}
+				else { //WHY AGAIN?
+					mdIn.style.display="block";
+					mdIn.style.width="98%";
+					htOut.style.display="none";
+					htOut.style.width="98%";
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+		<header>
+			<div class="head">
+				<a href=""><h1>ParseMD</h1></a>
+				<p>Minimalist Markdown to HTML Parser</p>
+			</div>
+
+			<div class="props">
+				<h4 style="margin: 0;"><u>Uses</u></h4>
+				<p>
+					<a href="https://github.com/chjj/marked">Marked</a> for parsing<br/>
+					markdown<br/>
+					and<br/>
+					<a href="http://iconmonstr.com">iconmonstr's</a> icons.
+				</p>
+			</div>
+		</header>
+
+		<aside></aside>
+		<section>
+			<div id="mdOptions">
+				<label>
+					<input type="checkbox" id="gfm" onclick="update();" checked/>
+					<span>Github flavoured markdown</span>
+				</label>
+				<label>
+					<input type="checkbox" id="tables" onclick="update();" checked/>
+					<span>Tables</span>
+				</label>
+				<label>
+					<input type="checkbox" id="breaks" onclick="update();"/>
+					<span>Breaks</span>
+				</label>
+				<label>
+					<input type="checkbox" id="pedantic" onclick="update();"/>
+					<span>Pedantic</span>
+				</label>
+				<label>
+					<input type="checkbox" id="sanitize" onclick="update();" checked/>
+					<span>Sanitize</span>
+				</label>
+				<label>
+					<input type="checkbox" id="smartlists" onclick="update();" checked/>
+					<span>Smartlists</span>
+				</label>
+				<label>
+					<input type="checkbox" id="smartypants" onclick="update();"/>
+					<span>Smartypants</span>
+				</label>
+			</div>
+
+			<div id="mdIn">
+				<div class="panelTop">
+					<label style="font-size: 0.8em;">
+						<img class="icons" title="Load markdown" alt="Load MD" src="./img/iconmonstr-disk-15-icon.svg"/>
+						<input type="file" id="fileIn" style="display: none;" onchange="loadInnerMd();"/>
+					</label>
+
+					<a id="dwmd" title="Save markdown" href="#"
+						onclick="downloadInner(this, 'markdown.md', 'textIn')">
+							<img class="icons" alt="Save MD" src="./img/iconmonstr-save-2-icon.svg"/>
+					</a>
+
+					<img class="icons" id="settingsBtn" title="View parser settings" alt="Settings" src="./img/iconmonstr-gear-icon.svg"
+						 onclick="toggleSettings();" style="cursor: pointer"/>
+
+					<label style="font-size: 1.5em">markdown.md</label>
+
+					<img class="mobicons" id="htEye" title="View html" alt="View html" src="./img/iconmonstr-eye-2-icon.svg"
+						 onclick="toggleView('mdIn', 'htOut');"/>
+				</div>
+
+				<textarea id="textIn" placeholder="Type or paste your markdown here..."
+					oninput="update();" onkeyup="update();" onchange="update();"></textarea>
+			</div>
+
+			<div id="htOut">
+				<div class="panelTop">
+					<a id="dwml" title="Save html" href="#"
+						onclick="downloadInner(this, 'preview.html', 'htmlOut')">
+							<img class="icons" alt="Save HTML" src="./img/iconmonstr-save-2-icon.svg"/>
+					</a>
+
+					<label style="font-size: 1.5em">preview.html</label>
+
+					<img class="mobicons" id="mdEye" title="View markdown" alt="View markdown" src="./img/iconmonstr-eye-5-icon.svg"
+						onclick="toggleView('htOut', 'mdIn');"/>
+				</div>
+				<div id="htmlOut"></div>
+			</div>
+		</section>
+
+		<footer>
+			<p>&copy; Arpan Pal 2014</p>
+			<a href="https://github.com/arpanpal010" title="GitHub: arpanpal010"><img class="contacticon" src="./img/iconmonstr-github-5-icon.svg" alt="github"></a>
+			<a href="https://in.linkedin.com/in/arpanpal010" title="LinkedIn: arpanpal010"><img class="contacticon" src="./img/iconmonstr-linkedin-5-icon.svg" alt="linkedin"></a>
+			<a href="https://twitter.com/arpanpal010" title="Twitter: arpanpal010"><img class="contacticon" src="./img/iconmonstr-twitter-5-icon.svg" alt="twitter"></a>
+			<!--div id="btnTop"><a href="#"><b style="font-size: 20px;">&#x21E7;</b><br><b>TOP</b></a></div-->
+
+		</footer>
+		<script type="text/javascript">
+			//set textarea default value
+			ta=document.getElementById("textIn");
+			ta.value='Headings\n========\n# This is the same as a h1 tag.\n\n##h2 is the\nsame as this.\n------\n\n###h3\n####h4\n#####h5\n######h6  \n\n* * * \n###Breaks\n\nLine breaks are done by putting two spaces after the line ends,  \nlike this, or by putting a blank line inbetween,\n\nlike this.\n\n-------\n###Blockquotes\n\n>Blockquotes are written like this. All the lines beginning with a &gt; is  >considered a blockquote.  \n> \n>This is the second paragrph.\n>And so it continues.\n>    >Also They can be nested.\n>\n\n-------\n###lists\n \\* or \\+  or numbered lists are interchangable but only numbered ones are ordered (actual numbers dont matter). They can be quoted or may contain heading, other lists etc.\n\n7. Item 1\n3. Item 2\n* Item 3\n+ Item 4\n- Item 5\n3. Item 6\n   4. Item 6.1\n   5. Item 6.2\n      8. Item 6.2.1\n      45. etc\n\n-------\n###code\n\n       Code blocks are indented 2TABs=8spaces at minimum. They are rendered as preformatted <pre><code>code</code></pre> elements.\n                And can be\n                        nested.\n\nfor a literal <code> tag, wrap the text in backtick "`".\n\n` code block here. `\n\n-------\n###links\n\nThis is [an example link](http://www.google.com "Google")  \n\nAnd [this link] [ref] actually follows a reference to ...  \nbla bla bla  \n[ref]: http://www.google.com "Google"\n\nor [another link] []\n\n[another link]: http://www.yahoo.com\n\nThe references can be anything even numbers.\n\n------\n###emphasis\n\n*<em>phasis*  is the same as _emphasis_\n\nor  \n\n**<strong>phasis** and __<strong>phasis__\n\n------\n###Images\n\n![alt text] (imgsrc "optional title")  \nor with ids...\n\n![alt text][id]\n\n[id]: img src "optional title"\n\n------\n###autolinks\n<http://example.com>\n\n<mailme@example.com>\n\n-------\n###escapes\n\nEscape special characters in URLs:  \nhttp://images.google.com/images?num=30&amp;=larry+bird  \n\nEscaping special characters  \n&amp; &lt; &gt; &copy;\n\n\\*This is an escaped asterisk \\*\n\n\\   backslash  \n\`   backtick  \n\\*   asterisk  \n\_   underscore  \n\{\}  curly braces  \n\[\]  square brackets  \n\(\)  parentheses  \n\\#   hash mark  \n\\+   plus sign  \n\\-   minus sign (hyphen)  \n\.   dot  \n\!   exclamation mark  \n';
+
+			//call parser on load
+			update();
+		</script>
+	</body>
+</html>
